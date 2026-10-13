@@ -17,13 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path , include
 from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('placement.urls')),
 ]
 
-if settings.DEBUG:
-    from django.conf import settings
-    from django.conf.urls.static import static
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve media files in both development and production
+# On Render, there is no separate web server to handle media files
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

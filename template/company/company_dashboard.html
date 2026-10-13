@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Company Dashboard - CampusHire{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto my-8 space-y-6">
+
+    <!-- Company Profile Header Card -->
+    <div class="bg-white rounded-3xl shadow-xl border border-slate-100 p-6 lg:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-5">
+            <div class="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center overflow-hidden border-2 border-blue-100 shadow-inner">
+                {% if company.logo %}
+                <img src="{{ company.logo.url }}" alt="{{ company.company_name }}" class="w-full h-full object-cover">
+                {% else %}
+                <span class="text-3xl">🏢</span>
+                {% endif %}
+            </div>
+            <div>
+                <h1 class="text-2xl font-extrabold text-slate-900">{{ company.company_name }}</h1>
+                <p class="text-xs text-slate-500 mt-1">Recruiter Dashboard &bull; <a href="{{ company.website }}" target="_blank" class="text-blue-600 hover:underline">{{ company.website }}</a></p>
+                <p class="text-xs text-slate-600 mt-2 line-clamp-1">{{ company.description }}</p>
+            </div>
+        </div>
+
+        <div>
+            <a href="{% url 'post_job' %}" class="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs rounded-xl shadow-md transition flex items-center gap-2">
+                <span>➕</span> Post New Job Drive
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Grid Sections -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Posted Jobs (Left 6 cols) -->
+        <div class="lg:col-span-6 bg-white rounded-3xl shadow-xl border border-slate-100 p-6 lg:p-8">
+            <div class="flex items-center justify-between mb-1">
+                <h2 class="text-lg font-bold text-slate-900">Your Posted Jobs</h2>
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-bold border border-blue-100">
+                    {{ jobs.count }} Total
+                </span>
+            </div>
+            <p class="text-xs text-slate-500 mb-5">Active listings managed by your company account.</p>
+
+            <div class="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+                {% if jobs %}
+                {% for job in jobs %}
+                <div class="p-4 rounded-2xl border border-slate-100 bg-slate-50 hover:border-slate-200 transition space-y-3">
+                    <div class="flex justify-between items-start gap-2">
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-sm">
+                                <a href="{% url 'job_detail' job.id %}" class="hover:text-blue-600 transition">{{ job.title }}</a>
+                            </h3>
+                            <p class="text-[11px] text-slate-500">{{ job.get_job_type_display }} &bull; ₹ {{ job.package_lpa }} LPA &bull; 📍 {{ job.location }}</p>
+                        </div>
+                        <span class="px-2 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-bold flex-shrink-0">
+                            Deadline: {{ job.deadline }}
+                        </span>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-200/70 text-xs">
+                        <a href="{% url 'job_detail' job.id %}" class="text-blue-600 hover:text-blue-700 font-semibold text-[11px] flex items-center gap-1">
+                            <span>👁️</span> View Details
+                        </a>
+
+                        <button type="button" data-url="{% url 'delete_job' job.id %}" data-title="{{ job.title }}"
+                            onclick="openDeleteModal(this.dataset.url, this.dataset.title, 'Job Drive')"
+                            class="px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold rounded-lg text-[11px] transition border border-rose-200 flex items-center gap-1"
+                            title="Delete this job listing">
+                            <span>🗑️</span> Delete Drive
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-xs text-slate-400 text-center py-8">No jobs posted yet. Click "+ Post New Job Drive" above.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Student Applications Received (Right 6 cols) -->
+        <div id="applicants-section" class="lg:col-span-6 bg-white rounded-3xl shadow-xl border border-slate-100 p-6 lg:p-8">
+            <div class="flex items-center justify-between mb-1">
+                <h2 class="text-lg font-bold text-slate-900">Applicants Received</h2>
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-bold border border-slate-200">
+                    {{ applications.count }} Total
+                </span>
+            </div>
+            <p class="text-xs text-slate-500 mb-5">Review students who applied for your job openings.</p>
+
+            <div class="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+                {% if applications %}
+                {% for app in applications %}
+                <div class="p-4 rounded-2xl border border-slate-100 bg-white shadow-sm hover:border-slate-200 transition space-y-3">
+                    <div class="flex justify-between items-start gap-2">
+                        <div>
+                            <h3 class="font-bold text-xs text-slate-900">{{ app.student.full_name }}</h3>
+                            <p class="text-[11px] text-slate-500">Applied for: <span class="font-semibold text-slate-700">{{ app.job.title }}</span></p>
+                        </div>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold flex-shrink-0
+                            {% if app.status == 'SELECTED' %}bg-emerald-100 text-emerald-700 border border-emerald-200
+                            {% elif app.status == 'SHORTLISTED' %}bg-indigo-100 text-indigo-700 border border-indigo-200
+                            {% elif app.status == 'INTERVIEW_SCHEDULED' %}bg-purple-100 text-purple-700 border border-purple-200
+                            {% elif app.status == 'UNDER_REVIEW' %}bg-amber-100 text-amber-800 border border-amber-200
+                            {% elif app.status == 'REJECTED' %}bg-rose-100 text-rose-700 border border-rose-200
+                            {% else %}bg-slate-100 text-slate-700 border border-slate-200{% endif %}">
+                            {{ app.get_status_display }}
+                        </span>
+                    </div>
+
+                    <!-- Meeting Link / Schedule Badge for Recruiter Review -->
+                    {% if app.interview_location_or_link or app.interview_date %}
+                        <div class="text-[11px] bg-slate-50 p-2 rounded-xl border border-slate-200 space-y-1">
+                            {% if app.interview_date %}
+                                <div class="text-slate-600 font-semibold text-[10px]">
+                                    📅 <strong>Scheduled:</strong> {{ app.interview_date|date:"M d, Y @ h:i A" }}
+                                </div>
+                            {% endif %}
+                            {% if app.interview_location_or_link %}
+                                <div class="flex items-center justify-between gap-2 text-indigo-700">
+                                    <span class="truncate font-medium">🎥 {{ app.interview_location_or_link }}</span>
+                                    {% if 'http://' in app.interview_location_or_link or 'https://' in app.interview_location_or_link %}
+                                        <a href="{{ app.interview_location_or_link }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 text-[10px] font-bold underline flex-shrink-0">
+                                            Test Link ↗
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% elif app.status == 'SHORTLISTED' or app.status == 'UNDER_REVIEW' or app.status == 'INTERVIEW_SCHEDULED' %}
+                        <div class="text-[10px] text-amber-600 bg-amber-50/70 px-2 py-1 rounded-lg border border-amber-200 flex items-center justify-between">
+                            <span>⚠️ Meeting link not attached yet.</span>
+                            <a href="{% url 'update_application_status' app.id %}" class="font-bold underline text-amber-700">Add Link</a>
+                        </div>
+                    {% endif %}
+
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
+                        <span class="text-slate-500">CGPA: <strong>{{ app.student.cgpa }}</strong> | Branch: <strong>{{ app.student.branch }}</strong></span>
+
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'update_application_status' app.id %}" class="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg transition">
+                                Update
+                            </a>
+                            <button type="button" data-url="{% url 'delete_application' app.id %}"
+                                data-title="{{ app.student.full_name }} for {{ app.job.title }}"
+                                onclick="openDeleteModal(this.dataset.url, this.dataset.title, 'Application')"
+                                class="p-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition border border-rose-200"
+                                title="Remove application">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-xs text-slate-400 text-center py-8">No candidate applications received yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

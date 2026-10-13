@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+
+{% block title %}Update Application - {{ application.student.full_name }} | CampusHire{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto my-6 space-y-6">
+
+    <!-- Breadcrumb & Back -->
+    <div class="flex items-center justify-between text-xs">
+        {% if user.profile.role == 'OFFICER' or user.is_staff or user.is_superuser %}
+            <a href="{% url 'officer_dashboard' %}" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-indigo-600 font-medium transition">
+                <span>&larr;</span> Back to Officer Dashboard
+            </a>
+        {% else %}
+            <a href="{% url 'company_dashboard' %}" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-blue-600 font-medium transition">
+                <span>&larr;</span> Back to Recruiter Dashboard
+            </a>
+        {% endif %}
+        <span class="text-slate-400">Application Reference #{{ application.id }}</span>
+    </div>
+
+    <!-- Candidate Summary Card -->
+    <div class="bg-white rounded-3xl shadow-xl border border-slate-100 p-6 lg:p-8 space-y-6">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-inner">
+                    {% if application.student.profile_pic %}
+                        <img src="{{ application.student.profile_pic.url }}" alt="{{ application.student.full_name }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <span class="text-2xl">🎓</span>
+                    {% endif %}
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-2xl font-extrabold text-slate-900">{{ application.student.full_name }}</h1>
+                        {% if application.student.is_placed %}
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">Placed 🎉</span>
+                        {% endif %}
+                    </div>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                        Applying for: <strong class="text-blue-600 font-semibold">{{ application.job.title }}</strong> &bull; ₹ {{ application.job.package_lpa }} LPA
+                    </p>
+                    <p class="text-[11px] text-slate-400">Submitted on: {{ application.applied_at|date:"M d, Y H:i" }}</p>
+                </div>
+            </div>
+
+            <!-- Resume Link -->
+            <div class="flex items-center gap-2">
+                {% if application.student.resume %}
+                    <a href="{{ application.student.resume.url }}" target="_blank" class="px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold rounded-xl transition flex items-center gap-2 border border-blue-200">
+                        <span>📄</span> View Student Resume
+                    </a>
+                {% else %}
+                    <span class="text-xs text-slate-400 bg-slate-50 px-3 py-2 rounded-xl">No Resume Uploaded</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Candidate Academic & Profile Details Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Roll Number</span>
+                <span class="text-xs font-bold text-slate-800">{{ application.student.roll_number }}</span>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Branch</span>
+                <span class="text-xs font-bold text-slate-800 truncate block">{{ application.student.get_branch_display }}</span>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">CGPA</span>
+                <span class="text-xs font-bold text-indigo-600">{{ application.student.cgpa }} / 10.0</span>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Active Backlogs</span>
+                <span class="text-xs font-bold {% if application.student.backlogs > 0 %}text-rose-600{% else %}text-emerald-600{% endif %}">
+                    {{ application.student.backlogs }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Contact & Skills -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
+                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Contact Information</span>
+                <p class="text-slate-700">✉️ Email: <a href="mailto:{{ application.student.user.email }}" class="text-blue-600 font-medium">{{ application.student.user.email }}</a></p>
+                {% if application.student.phone %}
+                    <p class="text-slate-700">📞 Phone: <span class="font-medium">{{ application.student.phone }}</span></p>
+                {% endif %}
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
+                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Student Skills</span>
+                <p class="text-slate-700 font-medium">
+                    {{ application.student.skills|default:"Not specified" }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Student Cover Note (if provided) -->
+        {% if application.cover_note %}
+            <div class="p-4 rounded-2xl bg-blue-50/50 border border-blue-100 space-y-1.5">
+                <span class="text-[10px] text-blue-600 font-bold uppercase tracking-wider block">Candidate Cover Note</span>
+                <p class="text-xs text-slate-700 italic">"{{ application.cover_note }}"</p>
+            </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Application Status Update Form -->
+    <div class="bg-white rounded-3xl shadow-xl border border-slate-100 p-6 lg:p-8 space-y-6">
+
+        <div class="border-b border-slate-100 pb-3">
+            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                <span>⚙️</span> Update Recruitment Status & Interview Meeting Link
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Move candidate through recruitment stages (Shortlisted, Review, Scheduled), include meeting links, and share instructions.</p>
+        </div>
+
+        <!-- Dynamic Notice Banner -->
+        <div id="statusNotice" class="p-3.5 rounded-2xl border text-xs flex items-start gap-2.5 transition {% if application.status == 'SHORTLISTED' %}bg-indigo-50 border-indigo-200 text-indigo-800{% elif application.status == 'UNDER_REVIEW' %}bg-amber-50 border-amber-200 text-amber-800{% elif application.status == 'INTERVIEW_SCHEDULED' %}bg-purple-50 border-purple-200 text-purple-800{% else %}bg-slate-50 border-slate-200 text-slate-700{% endif %}">
+            <span class="text-base" id="statusNoticeIcon">🎥</span>
+            <div>
+                <p class="font-bold text-[11px]" id="statusNoticeTitle">
+                    {% if application.status == 'SHORTLISTED' %}Candidate Shortlisted! Add Interview Meeting Link Below:
+                    {% elif application.status == 'UNDER_REVIEW' %}Under Review: Add Meeting Link or Review Instructions:
+                    {% elif application.status == 'INTERVIEW_SCHEDULED' %}Interview Scheduled: Provide Date, Time & Meeting Link:
+                    {% else %}Update Application Stage:
+                    {% endif %}
+                </p>
+                <p class="text-[10px] text-slate-600 mt-0.5" id="statusNoticeDesc">
+                    Candidates who are Shortlisted or Under Review will see the meeting link and join button on their student dashboard.
+                </p>
+            </div>
+        </div>
+
+        <form method="POST" action="{% url 'update_application_status' application.id %}" class="space-y-6">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
+                
+                <!-- Status Choice -->
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1.5">
+                        Application Status <span class="text-rose-500">*</span>
+                    </label>
+                    <select id="applicationStatusSelect" name="status" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 text-xs bg-white font-medium transition">
+                        <option value="APPLIED" {% if application.status == 'APPLIED' %}selected{% endif %}>Application Submitted</option>
+                        <option value="UNDER_REVIEW" {% if application.status == 'UNDER_REVIEW' %}selected{% endif %}>Under Review</option>
+                        <option value="SHORTLISTED" {% if application.status == 'SHORTLISTED' %}selected{% endif %}>Shortlisted for Interview</option>
+                        <option value="INTERVIEW_SCHEDULED" {% if application.status == 'INTERVIEW_SCHEDULED' %}selected{% endif %}>Interview Scheduled</option>
+                        <option value="SELECTED" {% if application.status == 'SELECTED' %}selected{% endif %}>Selected / Offer Extended (🎉 Placed)</option>
+                        <option value="REJECTED" {% if application.status == 'REJECTED' %}selected{% endif %}>Not Selected (Rejected)</option>
+                    </select>
+                    <span class="text-[10px] text-slate-400 mt-1 block">When set to Shortlisted or Under Review, be sure to include the meeting link.</span>
+                </div>
+
+                <!-- Interview Date & Time -->
+                <div>
+                    <label for="interviewDateInput" class="block font-semibold text-slate-700 mb-1.5">
+                        Interview / Review Date & Time
+                    </label>
+                    <input type="datetime-local" 
+                           name="interview_date" 
+                           id="interviewDateInput"
+                           value="{{ application.interview_date|date:'Y-m-d\TH:i' }}" 
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 text-xs bg-white text-slate-700 transition">
+                    <p id="interviewDateError" class="text-[11px] text-rose-600 font-medium mt-1 hidden"></p>
+                    <span class="text-[10px] text-slate-400 mt-1 block">Past dates and times (yesterday or earlier) cannot be selected.</span>
+                </div>
+
+                <!-- Interview Location / Meeting Link -->
+                <div class="md:col-span-2 p-4 rounded-2xl bg-blue-50/50 border border-blue-100 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label for="meetingLinkInput" class="block font-bold text-slate-900">
+                            🎥 Video Meeting Link (Google Meet / Zoom / MS Teams) or Location
+                        </label>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-semibold">Shown to Student</span>
+                    </div>
+                    <div class="relative">
+                        <input type="text" 
+                               name="interview_location_or_link" 
+                               id="meetingLinkInput" 
+                               value="{{ application.interview_location_or_link|default:'' }}" 
+                               placeholder="e.g. https://meet.google.com/xyz-abcd-efg or Zoom / Teams URL" 
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 text-xs bg-white font-mono">
+                    </div>
+                    <div class="flex items-center justify-between text-[11px] pt-1">
+                        <span class="text-slate-500">Paste your Google Meet, Zoom, or Teams link. Students get a direct "Join Meeting" button.</span>
+                        <a id="testLinkBtn" href="{{ application.interview_location_or_link|default:'#' }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 font-bold inline-flex items-center gap-1 {% if not application.interview_location_or_link %}hidden{% endif %}">
+                            <span>🔗 Test Link</span> ↗
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Remarks / Notes -->
+                <div class="md:col-span-2">
+                    <label class="block font-semibold text-slate-700 mb-1.5">
+                        Recruiter Feedback / Instructions (Shown to Student)
+                    </label>
+                    <textarea name="remarks" rows="3" placeholder="Add preparation notes, agenda for review, or interview instructions..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 text-xs resize-y">{{ application.remarks|default:'' }}</textarea>
+                </div>
+
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    {% if user.profile.role == 'OFFICER' or user.is_staff or user.is_superuser %}
+                        <a href="{% url 'officer_dashboard' %}" class="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium text-xs text-center transition">
+                            Cancel & Return to Officer Hub
+                        </a>
+                    {% else %}
+                        <a href="{% url 'company_dashboard' %}" class="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium text-xs text-center transition">
+                            Cancel & Return
+                        </a>
+                    {% endif %}
+
+                    <button type="button" 
+                            data-url="{% url 'delete_application' application.id %}" 
+                            data-title="{{ application.student.full_name }} for {{ application.job.title }}" 
+                            onclick="openDeleteModal(this.dataset.url, this.dataset.title, 'Application Record')" 
+                            class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold text-xs border border-rose-200 transition flex items-center justify-center gap-1.5">
+                        <span>🗑️</span> Delete Application
+                    </button>
+                </div>
+
+                <button type="submit" class="w-full sm:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                    <span>💾</span> Save & Update Status
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const statusSelect = document.getElementById('applicationStatusSelect');
+    const noticeEl = document.getElementById('statusNotice');
+    const noticeIcon = document.getElementById('statusNoticeIcon');
+    const noticeTitle = document.getElementById('statusNoticeTitle');
+    const noticeDesc = document.getElementById('statusNoticeDesc');
+    const meetingInput = document.getElementById('meetingLinkInput');
+    const testLinkBtn = document.getElementById('testLinkBtn');
+    
+    const interviewDateInput = document.getElementById('interviewDateInput');
+    const interviewDateError = document.getElementById('interviewDateError');
+
+    // 1. Restrict interview date picker to current/future dates only (disable yesterday and earlier)
+    function setMinInterviewDateTime() {
+        if (!interviewDateInput) return;
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const hh = String(now.getHours()).padStart(2, '0');
+        const min = String(now.getMinutes()).padStart(2, '0');
+        const minDateTime = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+        interviewDateInput.setAttribute('min', minDateTime);
+    }
+    setMinInterviewDateTime();
+
+    // 2. Validate interview date is not in the past
+    function validateInterviewDate() {
+        if (!interviewDateInput || !interviewDateInput.value) {
+            if (interviewDateError) interviewDateError.classList.add('hidden');
+            if (interviewDateInput) interviewDateInput.classList.remove('border-rose-500');
+            return true;
+        }
+
+        const selected = new Date(interviewDateInput.value);
+        const now = new Date();
+
+        if (selected < now) {
+            if (interviewDateError) {
+                interviewDateError.textContent = 'Interview date cannot be in the past (yesterday or earlier). Please select a current or future date and time.';
+                interviewDateError.classList.remove('hidden');
+            }
+            interviewDateInput.classList.add('border-rose-500');
+            return false;
+        } else {
+            if (interviewDateError) {
+                interviewDateError.textContent = '';
+                interviewDateError.classList.add('hidden');
+            }
+            interviewDateInput.classList.remove('border-rose-500');
+            return true;
+        }
+    }
+
+    if (interviewDateInput) {
+        interviewDateInput.addEventListener('change', validateInterviewDate);
+        interviewDateInput.addEventListener('input', validateInterviewDate);
+    }
+
+    // 3. Status notice banners
+    function updateNotice() {
+        const val = statusSelect.value;
+        noticeEl.className = 'p-3.5 rounded-2xl border text-xs flex items-start gap-2.5 transition ';
+        
+        if (val === 'SHORTLISTED') {
+            noticeEl.classList.add('bg-indigo-50', 'border-indigo-200', 'text-indigo-800');
+            noticeIcon.textContent = '⭐';
+            noticeTitle.textContent = 'Candidate Shortlisted for Interview Round!';
+            noticeDesc.textContent = 'Provide the meeting link below (Google Meet/Zoom) and schedule date/time. The student will see a "Join Meeting" button on their dashboard.';
+        } else if (val === 'UNDER_REVIEW') {
+            noticeEl.classList.add('bg-amber-50', 'border-amber-200', 'text-amber-800');
+            noticeIcon.textContent = '🔍';
+            noticeTitle.textContent = 'Application Under Review Round!';
+            noticeDesc.textContent = 'If conducting a review discussion, provide the meeting link below so the candidate can connect.';
+        } else if (val === 'INTERVIEW_SCHEDULED') {
+            noticeEl.classList.add('bg-purple-50', 'border-purple-200', 'text-purple-800');
+            noticeIcon.textContent = '📅';
+            noticeTitle.textContent = 'Interview Session Scheduled!';
+            noticeDesc.textContent = 'Provide the date, time and video meeting link below. Candidate will receive the join link.';
+        } else if (val === 'SELECTED') {
+            noticeEl.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
+            noticeIcon.textContent = '🎉';
+            noticeTitle.textContent = 'Candidate Selected / Offer Extended!';
+            noticeDesc.textContent = 'Student will automatically be marked as Placed.';
+        } else if (val === 'REJECTED') {
+            noticeEl.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-800');
+            noticeIcon.textContent = '✕';
+            noticeTitle.textContent = 'Candidate Not Selected';
+            noticeDesc.textContent = 'You can leave constructive feedback remarks for the candidate below.';
+        } else {
+            noticeEl.classList.add('bg-slate-50', 'border-slate-200', 'text-slate-700');
+            noticeIcon.textContent = '📋';
+            noticeTitle.textContent = 'Application Submitted';
+            noticeDesc.textContent = 'Move candidate through stages as your recruitment process advances.';
+        }
+    }
+
+    if (statusSelect) {
+        statusSelect.addEventListener('change', updateNotice);
+    }
+
+    // 4. Meeting Link test button
+    if (meetingInput && testLinkBtn) {
+        meetingInput.addEventListener('input', function() {
+            const url = this.value.trim();
+            if (url.startsWith('http://') || url.startsWith('https://')) {
+                testLinkBtn.href = url;
+                testLinkBtn.classList.remove('hidden');
+            } else {
+                testLinkBtn.classList.add('hidden');
+            }
+        });
+    }
+
+    // 5. Intercept submit to prevent past dates
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!validateInterviewDate()) {
+                e.preventDefault();
+                if (interviewDateInput) {
+                    interviewDateInput.focus();
+                }
+                return false;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

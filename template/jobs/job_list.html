@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}All Campus Jobs & Placement Drives - CampusHire{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto my-6 space-y-8">
+
+    <!-- Top Banner & Search Header -->
+    <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white rounded-3xl p-8 lg:p-10 shadow-xl relative overflow-hidden">
+        <div class="max-w-2xl space-y-3 relative z-10">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 rounded-full text-xs font-semibold backdrop-blur-sm">
+                <span>💼</span> Campus Placement Drives
+            </span>
+            <h1 class="text-3xl lg:text-4xl font-extrabold tracking-tight">
+                Discover Jobs & Career Opportunities
+            </h1>
+            <p class="text-blue-100 text-xs sm:text-sm leading-relaxed">
+                Explore placement drives from top recruiters. Check minimum CGPA requirements, job descriptions, and apply directly through CampusHire.
+            </p>
+
+            <!-- Search Bar Form -->
+            <form method="GET" action="{% url 'job_list' %}" class="pt-2 flex flex-col sm:flex-row gap-2 max-w-xl">
+                <div class="relative flex-grow">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">🔍</span>
+                    <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Search by job title, skill (Python, React...), or company name..." class="w-full pl-10 pr-3.5 py-3 rounded-xl text-slate-800 text-xs focus:outline-none shadow-sm bg-white">
+                </div>
+                <button type="submit" class="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5">
+                    Search Jobs
+                </button>
+            </form>
+        </div>
+
+        <div class="absolute -right-10 -bottom-10 opacity-10 text-9xl select-none pointer-events-none">
+            🎓
+        </div>
+    </div>
+
+    <!-- Active Jobs Count & Quick Filters -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+        <div>
+            <h2 class="text-base font-bold text-slate-900">
+                Available Openings
+                <span class="text-slate-400 font-normal text-xs">({{ jobs.count }} jobs found)</span>
+            </h2>
+            {% if query %}
+                <p class="text-slate-500 text-[11px] mt-0.5">
+                    Showing results for: <span class="font-semibold text-blue-600">"{{ query }}"</span> &bull; <a href="{% url 'job_list' %}" class="text-slate-400 hover:underline">Clear Search</a>
+                </p>
+            {% endif %}
+        </div>
+
+        {% if request.user.profile.role == 'COMPANY' %}
+            <div>
+                <a href="{% url 'post_job' %}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs shadow transition flex items-center gap-1.5">
+                    <span>➕</span> Post New Job Drive
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Jobs Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% if jobs %}
+            {% for job in jobs %}
+                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-lg hover:shadow-xl hover:border-blue-200 transition flex flex-col justify-between space-y-4">
+                    
+                    <div class="space-y-3">
+                        <!-- Top Row: Logo & Compensation -->
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                {% if job.company.logo %}
+                                    <img src="{{ job.company.logo.url }}" alt="{{ job.company.company_name }}" class="w-full h-full object-cover">
+                                {% else %}
+                                    <span class="text-xl">🏢</span>
+                                {% endif %}
+                            </div>
+
+                            <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-extrabold border border-emerald-100">
+                                ₹ {{ job.package_lpa }} LPA
+                            </span>
+                        </div>
+
+                        <!-- Job Title & Company -->
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-sm hover:text-blue-600 transition">
+                                <a href="{% url 'job_detail' job.id %}">{{ job.title }}</a>
+                            </h3>
+                            <p class="text-xs text-blue-600 font-medium">{{ job.company.company_name }}</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-2">
+                                <span>📍 {{ job.location }}</span> &bull; 
+                                <span>💼 {{ job.get_job_type_display }}</span>
+                            </p>
+                        </div>
+
+                        <!-- Short Description -->
+                        <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                            {{ job.description }}
+                        </p>
+
+                        <!-- Required Skills Tags -->
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            {% for skill in job.required_skills.split|slice:":3" %}
+                                <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-medium">
+                                    {{ skill|cut:"," }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Card Footer: Criteria & Action -->
+                    <div class="pt-3 border-t border-slate-100 space-y-3">
+                        <div class="flex items-center justify-between text-[11px] text-slate-400">
+                            <span>Min CGPA: <strong class="text-slate-700">{{ job.min_cgpa }}</strong></span>
+                            <span>Deadline: <strong class="text-slate-700">{{ job.deadline|date:"M d" }}</strong></span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'job_detail' job.id %}" class="flex-grow py-2.5 bg-slate-900 hover:bg-blue-600 text-white font-semibold text-xs rounded-xl text-center transition">
+                                View Details & Apply &rarr;
+                            </a>
+                            {% if request.user.company_profile == job.company or request.user.profile.role == 'OFFICER' or request.user.is_staff or request.user.is_superuser %}
+                                <button type="button" 
+                                        data-url="{% url 'delete_job' job.id %}" 
+                                        data-title="{{ job.title }}" 
+                                        onclick="openDeleteModal(this.dataset.url, this.dataset.title, 'Job Drive')" 
+                                        class="p-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl transition border border-rose-200 flex-shrink-0" 
+                                        title="Delete Job Drive">
+                                    🗑️
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-span-full bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-lg space-y-3">
+                <span class="text-4xl">💼</span>
+                <h3 class="text-base font-bold text-slate-800">No Job Drives Found</h3>
+                <p class="text-xs text-slate-400 max-w-sm mx-auto">
+                    There are currently no active placement drives matching your query. Check back soon or clear search filters.
+                </p>
+                {% if query %}
+                    <a href="{% url 'job_list' %}" class="inline-block px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-xl transition">
+                        View All Active Openings
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

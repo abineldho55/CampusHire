@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard - CampusHire{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto my-8 space-y-6">
+
+    <!-- Top Profile Banner Card -->
+    <div class="bg-white rounded-3xl shadow-xl border border-slate-100 p-6 lg:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-5">
+            <div class="w-20 h-20 bg-indigo-100 rounded-2xl flex items-center justify-center overflow-hidden border-2 border-indigo-50 shadow-inner">
+                {% if student.profile_pic %}
+                    <img src="{{ student.profile_pic.url }}" alt="{{ student.full_name }}" class="w-full h-full object-cover">
+                {% else %}
+                    <span class="text-3xl">🎓</span>
+                {% endif %}
+            </div>
+            <div>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-2xl font-extrabold text-slate-900">{{ student.full_name }}</h1>
+                    {% if student.is_placed %}
+                        <span class="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full text-[11px] font-bold tracking-wide">Placed 🎉</span>
+                    {% else %}
+                        <span class="px-3 py-1 bg-amber-50 text-amber-600 border border-amber-100 rounded-full text-[11px] font-bold tracking-wide">Looking for Opportunities</span>
+                    {% endif %}
+                </div>
+                <p class="text-xs text-slate-500 mt-1">
+                    {{ student.get_branch_display }} &bull; Roll No: <span class="font-semibold text-slate-700">{{ student.roll_number }}</span>
+                </p>
+                <div class="flex flex-wrap gap-4 mt-3 text-xs text-slate-600">
+                    <div>CGPA: <span class="font-bold text-indigo-600">{{ student.cgpa }}</span></div>
+                    <div>Backlogs: <span class="font-bold text-slate-800">{{ student.backlogs }}</span></div>
+                    <div>Graduation: <span class="font-semibold">{{ student.graduation_year }}</span></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            {% if student.resume %}
+                <a href="{{ student.resume.url }}" target="_blank" class="px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium text-xs rounded-xl text-center transition flex items-center justify-center gap-2">
+                    <span>📄</span> View Resume
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Main Grid Sections -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Active Jobs Section (Left 7 cols) -->
+        <div class="lg:col-span-7 bg-white rounded-3xl shadow-xl border border-slate-100 p-6 lg:p-8">
+            <h2 class="text-lg font-bold text-slate-900 mb-1">Active Job Openings</h2>
+            <p class="text-xs text-slate-500 mb-5">Explore open placement drives and apply based on your eligibility.</p>
+
+            <div class="space-y-4 max-h-[600px] overflow-y-auto pr-1">
+                {% if active_jobs %}
+                    {% for job in active_jobs %}
+                        <div class="p-4 rounded-2xl border border-slate-100 bg-slate-50 hover:border-indigo-200 transition space-y-3">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-bold text-slate-900 text-sm">{{ job.title }}</h3>
+                                    <p class="text-xs text-indigo-600 font-medium">{{ job.company.company_name }} &bull; {{ job.location }}</p>
+                                </div>
+                                <span class="px-2.5 py-1 bg-white text-slate-700 rounded-lg text-[11px] font-bold shadow-sm border border-slate-200">
+                                    ₹ {{ job.package_lpa }} LPA
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-600 line-clamp-2">{{ job.description }}</p>
+                            <div class="flex items-center justify-between pt-2 border-t border-slate-200/60 text-[11px] text-slate-500">
+                                <span>Min CGPA: {{ job.min_cgpa }} | Deadline: {{ job.deadline }}</span>
+                                <a href="{% url 'job_detail' job.id %}" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition">
+                                    View & Apply
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-xs text-slate-400 text-center py-8">No active job openings available at the moment.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Submitted Applications Section (Right 5 cols) -->
+        <div id="applications-section" class="lg:col-span-5 bg-white rounded-3xl shadow-xl border border-slate-100 p-6 lg:p-8">
+            <div class="flex items-center justify-between mb-1">
+                <h2 class="text-lg font-bold text-slate-900">My Applications</h2>
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-100">{{ applications.count }} Applied</span>
+            </div>
+            <p class="text-xs text-slate-500 mb-5">Track the status of your submitted job requests.</p>
+
+            <div class="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+                {% if applications %}
+                    {% for app in applications %}
+                        <div class="p-4 rounded-2xl border border-slate-100 bg-white shadow-sm hover:border-slate-200 transition space-y-2.5">
+                            <div class="flex justify-between items-start gap-2">
+                                <div>
+                                    <h3 class="font-bold text-xs text-slate-900">
+                                        <a href="{% url 'job_detail' app.job.id %}" class="hover:text-blue-600 transition">{{ app.job.title }}</a>
+                                    </h3>
+                                    <p class="text-[11px] text-slate-500">{{ app.job.company.company_name }} &bull; ₹ {{ app.job.package_lpa }} LPA</p>
+                                </div>
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold flex-shrink-0
+                                    {% if app.status == 'SELECTED' %}bg-emerald-100 text-emerald-700 border border-emerald-200
+                                    {% elif app.status == 'SHORTLISTED' %}bg-indigo-100 text-indigo-700 border border-indigo-200
+                                    {% elif app.status == 'INTERVIEW_SCHEDULED' %}bg-purple-100 text-purple-700 border border-purple-200
+                                    {% elif app.status == 'UNDER_REVIEW' %}bg-amber-100 text-amber-800 border border-amber-200
+                                    {% elif app.status == 'REJECTED' %}bg-rose-100 text-rose-700 border border-rose-200
+                                    {% else %}bg-blue-100 text-blue-700 border border-blue-200{% endif %}">
+                                    {{ app.get_status_display }}
+                                </span>
+                            </div>
+
+                            <!-- Meeting Link & Interview Details for Shortlisted / Under Review / Scheduled -->
+                            {% if app.interview_location_or_link or app.interview_date %}
+                                <div class="rounded-2xl p-3.5 border transition shadow-sm space-y-2.5
+                                    {% if app.status == 'SHORTLISTED' %}bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-200 text-indigo-900
+                                    {% elif app.status == 'UNDER_REVIEW' %}bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 text-amber-900
+                                    {% elif app.status == 'INTERVIEW_SCHEDULED' %}bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200 text-purple-900
+                                    {% else %}bg-slate-50 border-slate-200 text-slate-800{% endif %}">
+                                    
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="flex items-center gap-1.5 font-bold text-xs">
+                                            <span>🎥</span>
+                                            {% if app.status == 'SHORTLISTED' %}
+                                                <span>Shortlisted Interview Round</span>
+                                            {% elif app.status == 'UNDER_REVIEW' %}
+                                                <span>Review Meeting Details</span>
+                                            {% elif app.status == 'INTERVIEW_SCHEDULED' %}
+                                                <span>Scheduled Interview Session</span>
+                                            {% else %}
+                                                <span>Meeting / Interview Details</span>
+                                            {% endif %}
+                                        </div>
+                                        {% if app.interview_date %}
+                                            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/80 border border-current/20 shadow-xs flex-shrink-0">
+                                                📅 {{ app.interview_date|date:"M d, Y @ h:i A" }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+
+                                    {% if app.interview_location_or_link %}
+                                        <div class="bg-white/95 p-3 rounded-xl border border-current/10 space-y-2">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <div class="text-[11px] font-medium truncate flex items-center gap-1.5">
+                                                    <span class="text-blue-600 font-bold">🔗 Meeting Link:</span>
+                                                    {% if 'http://' in app.interview_location_or_link or 'https://' in app.interview_location_or_link %}
+                                                        <a href="{{ app.interview_location_or_link }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline font-semibold truncate hover:text-blue-800" title="{{ app.interview_location_or_link }}">
+                                                            {{ app.interview_location_or_link }}
+                                                        </a>
+                                                    {% else %}
+                                                        <span class="text-slate-800 font-semibold">{{ app.interview_location_or_link }}</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+
+                                            {% if 'http://' in app.interview_location_or_link or 'https://' in app.interview_location_or_link %}
+                                                <div class="flex items-center gap-2 pt-0.5">
+                                                    <a href="{{ app.interview_location_or_link }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition">
+                                                        <span>🚀</span> Join Meeting Now
+                                                    </a>
+                                                    <button type="button" onclick="navigator.clipboard.writeText('{{ app.interview_location_or_link }}'); alert('Meeting link copied to clipboard!');" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs border border-slate-200 transition">
+                                                        📋 Copy Link
+                                                    </button>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+
+                                    {% if app.remarks %}
+                                        <div class="text-[10px] bg-white/70 p-2 rounded-lg border border-current/10 leading-relaxed">
+                                            <span class="font-bold">💬 Instructions from Recruiter:</span> {{ app.remarks }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% elif app.status == 'SHORTLISTED' %}
+                                <div class="p-2.5 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 text-[11px] flex items-center gap-2">
+                                    <span>⭐</span>
+                                    <span>You are <strong>Shortlisted</strong>! The recruiter will update your meeting link and schedule here shortly.</span>
+                                </div>
+                            {% elif app.status == 'UNDER_REVIEW' %}
+                                <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-100 text-amber-800 text-[11px] flex items-center gap-2">
+                                    <span>🔍</span>
+                                    <span>Your profile is currently <strong>Under Review</strong> by the company. Meeting link will appear here once scheduled.</span>
+                                </div>
+                            {% endif %}
+
+                            <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
+                                <span class="text-slate-400">Applied {{ app.applied_at|date:"M d, Y" }}</span>
+                                <button type="button" 
+                                        data-url="{% url 'delete_application' app.id %}" 
+                                        data-title="{{ app.job.title }}" 
+                                        onclick="openDeleteModal(this.dataset.url, this.dataset.title, 'Application Submission')" 
+                                        class="text-rose-600 hover:text-rose-700 font-semibold text-[11px] flex items-center gap-1 hover:underline">
+                                    <span>🗑️</span> Withdraw Application
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-xs text-slate-400 text-center py-8">You haven't applied to any jobs yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

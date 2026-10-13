@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+
+{% block title %}CampusHire - Smart Campus Placement Platform{% endblock %}
+
+{% block content %}
+<div class="space-y-20 pb-12">
+
+    <!-- HERO SECTION -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center pt-6">
+        <div class="lg:col-span-7 space-y-6">
+            <span class="inline-flex items-center gap-2 bg-blue-50 text-blue-600 text-xs font-semibold px-3 py-1.5 rounded-full border border-blue-100">
+                <span>🎓</span> Smart Campus Placement Platform
+            </span>
+            <h1 class="text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                Your Career.<br><span class="text-blue-600">Your Opportunity.</span>
+            </h1>
+            <p class="text-slate-600 text-base lg:text-lg max-w-xl">
+                CampusHire is a centralized Student Placement Management System connecting students, companies and placement teams in one unified platform.
+            </p>
+            <div class="flex flex-wrap items-center gap-4 pt-2">
+                <a href="{% url 'job_list' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-6 py-3.5 rounded-xl shadow-md transition flex items-center gap-2">
+                    Explore Jobs &rarr;
+                </a>
+                <a href="{% url 'register_student' %}" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold text-sm px-6 py-3.5 rounded-xl transition">
+                    Get Started
+                </a>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-slate-500 pt-2">
+                <span class="text-emerald-500 font-bold">✓</span> Manage your complete placement journey
+            </div>
+        </div>
+
+        <!-- Dashboard Preview Card -->
+        <div class="lg:col-span-5 flex justify-center">
+            <div class="w-full max-w-sm bg-white rounded-3xl p-6 border border-slate-200 shadow-xl space-y-4">
+                <div class="border-b pb-3">
+                    <h3 class="font-bold text-slate-900 text-base">Placement Dashboard</h3>
+                    <p class="text-xs text-slate-400">Your Overview, Our Support</p>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <span>👤</span>
+                            <div>
+                                <p class="font-semibold text-slate-800">Profile</p>
+                                <p class="text-slate-400 text-[10px]">Complete your profile</p>
+                            </div>
+                        </div>
+                        <span class="text-slate-400">&rsaquo;</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <span>💼</span>
+                            <div>
+                                <p class="font-semibold text-slate-800">Jobs</p>
+                                <p class="text-slate-400 text-[10px]">Explore matching jobs</p>
+                            </div>
+                        </div>
+                        <span class="text-slate-400">&rsaquo;</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <span>📄</span>
+                            <div>
+                                <p class="font-semibold text-slate-800">Applications</p>
+                                <p class="text-slate-400 text-[10px]">Track application status</p>
+                            </div>
+                        </div>
+                        <span class="text-slate-400">&rsaquo;</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <span>📅</span>
+                            <div>
+                                <p class="font-semibold text-slate-800">Interviews</p>
+                                <p class="text-slate-400 text-[10px]">Manage interview schedules</p>
+                            </div>
+                        </div>
+                        <span class="text-slate-400">&rsaquo;</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <span>📊</span>
+                            <div>
+                                <p class="font-semibold text-slate-800">Placement Status</p>
+                                <p class="text-slate-400 text-[10px]">Track your placement offer</p>
+                            </div>
+                        </div>
+                        <span class="text-slate-400">&rsaquo;</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- METRICS & STATS SECTION -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm">
+            <h3 class="text-3xl font-extrabold text-blue-600 mb-1">1,200+</h3>
+            <p class="text-xs text-slate-500 font-medium">Registered Students</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm">
+            <h3 class="text-3xl font-extrabold text-blue-600 mb-1">85+</h3>
+            <p class="text-xs text-slate-500 font-medium">Recruiting Companies</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm">
+            <h3 class="text-3xl font-extrabold text-blue-600 mb-1">320+</h3>
+            <p class="text-xs text-slate-500 font-medium">Job Opportunities</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm">
+            <h3 class="text-3xl font-extrabold text-blue-600 mb-1">78%</h3>
+            <p class="text-xs text-slate-500 font-medium">Placement Rate</p>
+        </div>
+    </section>
+
+    <!-- EVERYTHING YOU NEED FOR PLACEMENT (SERVICES) -->
+    <section class="space-y-8 text-center">
+        <div>
+            <span class="text-xs font-semibold text-blue-600 uppercase tracking-widest">ABOUT CAMPUSHIRE</span>
+            <h2 class="text-3xl font-bold text-slate-900 mt-1">Everything You Need for Placement</h2>
+            <p class="text-xs text-slate-500 max-w-xl mx-auto mt-2">
+                CampusHire provides a centralized platform for students, companies and placement teams to manage recruitment and placement activities efficiently.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+            <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center font-bold mb-4">
+                    🎓
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mb-2">Student Management</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Create student profiles, manage academic information, skills, resumes and placement eligibility.
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center font-bold mb-4">
+                    🏢
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mb-2">Company Management</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Connect with recruiters and manage company profiles, job opportunities and recruitment drives.
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center font-bold mb-4">
+                    📈
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mb-2">Placement Tracking</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Track applications, interviews, selections and final placement status from one platform.
+                </p>
+            </div>
+        </div>
+
+        <div class="pt-2">
+            <a href="#campushire" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-6 py-3 rounded-xl transition shadow-sm">
+                Learn More About CampusHire &rarr;
+            </a>
+        </div>
+    </section>
+
+    <!-- FEATURED JOBS SECTION -->
+    <section class="space-y-8 text-center">
+        <div>
+            <span class="text-xs font-semibold text-blue-600 uppercase tracking-widest">OPPORTUNITIES</span>
+            <h2 class="text-3xl font-bold text-slate-900 mt-1">Featured Jobs</h2>
+            <p class="text-xs text-slate-500 max-w-xl mx-auto mt-2">
+                Explore some of the job opportunities available through the CampusHire placement platform.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+            <!-- Job 1 -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                <div>
+                    <div class="w-8 h-8 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center font-mono text-xs font-bold mb-3">&lt;/&gt;</div>
+                    <h3 class="font-bold text-slate-900 text-base">Python Developer</h3>
+                    <p class="text-xs text-slate-500 mb-4">Technology Company</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="bg-slate-100 text-slate-600 text-[10px] px-2.5 py-1 rounded-md font-medium">Python</span>
+                        <span class="bg-slate-100 text-slate-600 text-[10px] px-2.5 py-1 rounded-md font-medium">Django</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-slate-400 border-t pt-4">
+                    <span>📍 Kochi</span>
+                    <a href="{% url 'login' %}" class="text-blue-600 font-semibold hover:underline">View Job &rarr;</a>
+                </div>
+            </div>
+
+            <!-- Job 2 -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                <div>
+                    <div class="w-8 h-8 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center font-mono text-xs font-bold mb-3">&lt;/&gt;</div>
+                    <h3 class="font-bold text-slate-900 text-base">Web Developer</h3>
+                    <p class="text-xs text-slate-500 mb-4">Software Solutions</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="bg-slate-100 text-slate-600 text-[10px] px-2.5 py-1 rounded-md font-medium">HTML</span>
+                        <span class="bg-slate-100 text-slate-600 text-[10px] px-2.5 py-1 rounded-md font-medium">Bootstrap</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-slate-400 border-t pt-4">
+                    <span>📍 Bangalore</span>
+                    <a href="{% url 'login' %}" class="text-blue-600 font-semibold hover:underline">View Job &rarr;</a>
+                </div>
+            </div>
+
+            <!-- Job 3 -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                <div>
+                    <div class="w-8 h-8 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center font-mono text-xs font-bold mb-3">&lt;/&gt;</div>
+                    <h3 class="font-bold text-slate-900 text-base">Data Analyst</h3>
+                    <p class="text-xs text-slate-500 mb-4">Analytics Company</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="bg-slate-100 text-slate-600 text-[10px] px-2.5 py-1 rounded-md font-medium">Python</span>
+                        <span class="bg-slate-100 text-slate-600 text-[10px] px-2.5 py-1 rounded-md font-medium">SQL</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-slate-400 border-t pt-4">
+                    <span>📍 Chennai</span>
+                    <a href="{% url 'login' %}" class="text-blue-600 font-semibold hover:underline">View Job &rarr;</a>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <a href="{% url 'job_list' %}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-6 py-3 rounded-xl transition shadow-sm">
+                View All Jobs &rarr;
+            </a>
+        </div>
+    </section>
+
+    <!-- CONNECT WITH TOP COMPANIES -->
+    <section class="space-y-8 text-center">
+        <div>
+            <span class="text-xs font-semibold text-blue-600 uppercase tracking-widest">RECRUITERS</span>
+            <h2 class="text-3xl font-bold text-slate-900 mt-1">Connect With Top Companies</h2>
+            <p class="text-xs text-slate-500 max-w-xl mx-auto mt-2">
+                Discover companies looking for talented students and fresh graduates.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center">
+                <div class="w-10 h-10 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center mb-3 text-lg">💻</div>
+                <h3 class="font-bold text-slate-900 text-sm mb-1">IT Companies</h3>
+                <p class="text-[11px] text-slate-500">Software development and technology opportunities.</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center">
+                <div class="w-10 h-10 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center mb-3 text-lg">📊</div>
+                <h3 class="font-bold text-slate-900 text-sm mb-1">Data Companies</h3>
+                <p class="text-[11px] text-slate-500">Analytics, database and data science opportunities.</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center">
+                <div class="w-10 h-10 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center mb-3 text-lg">☁️</div>
+                <h3 class="font-bold text-slate-900 text-sm mb-1">Cloud Companies</h3>
+                <p class="text-[11px] text-slate-500">Cloud, infrastructure and DevOps opportunities.</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center">
+                <div class="w-10 h-10 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center mb-3 text-lg">🛡️</div>
+                <h3 class="font-bold text-slate-900 text-sm mb-1">Cybersecurity</h3>
+                <p class="text-[11px] text-slate-500">Security, SOC and cybersecurity opportunities.</p>
+            </div>
+        </div>
+
+        <div>
+            <a href="{% url 'register_company' %}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-6 py-3 rounded-xl transition shadow-sm">
+                Explore Companies &rarr;
+            </a>
+        </div>
+    </section>
+
+    <!-- CALL TO ACTION BANNER -->
+    <section class="bg-blue-600 text-white rounded-3xl p-10 lg:p-14 text-center space-y-4 shadow-lg">
+        <h2 class="text-3xl font-extrabold">Ready to Start Your Career?</h2>
+        <p class="text-blue-100 text-xs lg:text-sm max-w-lg mx-auto">
+            Create your profile, discover opportunities and take the next step toward your dream career.
+        </p>
+        <div class="pt-2">
+            <a href="{% url 'register_student' %}" class="inline-flex items-center gap-2 bg-white text-blue-600 font-bold text-xs px-6 py-3 rounded-xl hover:bg-blue-50 transition shadow">
+                Create Your Profile &rarr;
+            </a>
+        </div>
+    </section>
+
+</div>
+
+{% endblock %}

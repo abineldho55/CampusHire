@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In - CampusHire{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto my-8 bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+
+    <!-- Left Blue Sidebar -->
+    <div class="lg:col-span-5 bg-blue-600 text-white p-8 lg:p-12 flex flex-col justify-between">
+        <div>
+            <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-2xl mb-8">
+                🎓
+            </div>
+            <h2 class="text-3xl font-extrabold mb-4 leading-tight">Start your journey toward success.</h2>
+            <p class="text-blue-100 text-xs leading-relaxed mb-8">
+                Connect with companies, discover placement opportunities, manage applications, and build your career through CampusHire.
+            </p>
+            
+            <div class="space-y-4 text-xs">
+                <div class="flex items-start gap-3 bg-white/10 p-3 rounded-xl backdrop-blur-sm">
+                    <span class="text-base">💼</span>
+                    <div>
+                        <p class="font-bold">Find Opportunities</p>
+                        <p class="text-[10px] text-blue-100">Discover jobs and placement opportunities.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 bg-white/10 p-3 rounded-xl backdrop-blur-sm">
+                    <span class="text-base">🚀</span>
+                    <div>
+                        <p class="font-bold">Apply Easily</p>
+                        <p class="text-[10px] text-blue-100">Apply for suitable opportunities quickly.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 bg-white/10 p-3 rounded-xl backdrop-blur-sm">
+                    <span class="text-base">📈</span>
+                    <div>
+                        <p class="font-bold">Track Your Progress</p>
+                        <p class="text-[10px] text-blue-100">Monitor applications and interviews.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 bg-white/10 p-3 rounded-xl backdrop-blur-sm">
+                    <span class="text-base">🏢</span>
+                    <div>
+                        <p class="font-bold">Connect With Companies</p>
+                        <p class="text-[10px] text-blue-100">Build connections with recruiters.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Login Form Section -->
+    <div class="lg:col-span-7 p-8 lg:p-12 flex flex-col justify-center">
+        <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-1">WELCOME BACK</span>
+        <h2 class="text-3xl font-bold text-slate-900 mb-1">Welcome back 👋</h2>
+        <p class="text-xs text-slate-400 mb-8">Sign in to continue to your CampusHire account.</p>
+
+        <form method="POST" action="{% url 'login' %}" class="space-y-5">
+            {% csrf_token %}
+
+            <div class="text-xs">
+                <label class="block font-semibold text-slate-700 mb-1.5">Email Address</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">✉️</span>
+                    <input type="email" name="username" placeholder="you@example.com" required class="w-full pl-10 pr-3.5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 text-xs">
+                </div>
+            </div>
+
+            <div class="text-xs">
+                <label class="block font-semibold text-slate-700 mb-1.5">Password</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">🔒</span>
+                    <input type="password" name="password" placeholder="Enter your password" required class="w-full pl-10 pr-3.5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 text-xs">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between text-xs pt-1">
+                <label class="flex items-center gap-2 text-slate-600 cursor-pointer">
+                    <input type="checkbox" name="remember_me" class="rounded border-slate-300 text-blue-600">
+                    <span>Remember me</span>
+                </label>
+                <a href="#" class="text-blue-600 font-semibold hover:underline">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-3.5 rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                <span>Sign In &rarr;</span>
+            </button>
+        </form>
+
+        <div class="relative my-6 text-center">
+            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
+            <span class="relative bg-white px-4 text-[11px] text-slate-400">or</span>
+        </div>
+
+        <div class="text-center text-xs space-y-3">
+            <p class="text-slate-500">
+                New to CampusHire? <a href="{% url 'register_company' %}" class="text-blue-600 font-bold hover:underline">Create an account for company</a> <br>or</b> <a href="{% url 'register_student' %}" class="text-blue-600 font-bold hover:underline">Create an account for student</a>
+                
+
+            </p>
+                
+            <p class="text-[11px] text-slate-400 flex items-center justify-center gap-1">
+                <span class="text-emerald-500">✓</span> Your information is securely protected
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

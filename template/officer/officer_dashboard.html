@@ -1,0 +1,800 @@
+{% extends 'base.html' %}
+
+{% block title %}Office Administrator Dashboard | CampusHire{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-8 my-6">
+
+    <!-- 1. OFFICER CONTROL CENTER HEADER -->
+    <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+        <div class="absolute -right-12 -top-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute right-32 -bottom-16 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div class="space-y-2 max-w-3xl">
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 flex items-center gap-1.5">
+                        <span>🏛️</span> Office Administrator Control Center
+                    </span>
+                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> System Operational
+                    </span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                    Campus Placement & Recruiter Authenticity Hub
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    Verify company authenticity to prevent fake recruiters, manage job drives across campus, track interview meeting links, and monitor end-to-end student placements.
+                </p>
+            </div>
+
+            <!-- Quick Action Badges -->
+            <div class="flex flex-wrap lg:flex-col gap-2.5 shrink-0 text-xs">
+                {% if pending_companies_count > 0 %}
+                    <a href="#companies-section" onclick="switchTab('companies'); filterCompanyStatus('pending');" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold transition flex items-center gap-2 shadow-lg animate-pulse">
+                        <span>⚠️</span> {{ pending_companies_count }} Companies Pending Review
+                    </a>
+                {% else %}
+                    <span class="px-4 py-2.5 rounded-xl bg-white/10 text-emerald-300 font-semibold flex items-center gap-2 border border-white/10">
+                        <span>✓</span> All Companies Verified
+                    </span>
+                {% endif %}
+                <a href="{% url 'admin:index' %}" target="_blank" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold transition flex items-center gap-2 border border-white/10">
+                    <span>⚙️</span> Django Database Admin ↗
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. HIGH-LEVEL KPI METRICS -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        
+        <!-- Metric 1: Placed Students -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Placement Rate</span>
+                <span class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">🎓</span>
+            </div>
+            <div>
+                <div class="text-2xl sm:text-3xl font-extrabold text-slate-900">{{ placement_rate }}%</div>
+                <div class="text-xs text-slate-500 mt-1 font-medium">{{ placed_students }} of {{ total_students }} Students Placed</div>
+            </div>
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                <div class="bg-emerald-500 h-2 rounded-full transition-all duration-500" style="width: {{ placement_rate }}%;"></div>
+            </div>
+        </div>
+
+        <!-- Metric 2: Companies & Verification -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Companies</span>
+                <span class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">🏢</span>
+            </div>
+            <div>
+                <div class="text-2xl sm:text-3xl font-extrabold text-slate-900">{{ total_companies }}</div>
+                <div class="text-xs text-slate-500 mt-1 flex items-center gap-2">
+                    <span class="text-emerald-600 font-bold">{{ verified_companies_count }} Real</span> &bull;
+                    <span class="text-amber-600 font-bold">{{ pending_companies_count }} Pending</span> &bull;
+                    <span class="text-rose-600 font-bold">{{ rejected_companies_count }} Fake</span>
+                </div>
+            </div>
+            <div class="flex h-2 rounded-full overflow-hidden bg-slate-100">
+                {% widthratio verified_companies_count total_companies 100 as verified_companies_percent %}
+                <div class="bg-emerald-500" style="width: {{ verified_companies_percent }}%;"></div>
+                {% widthratio pending_companies_count total_companies 100 as pending_companies_percent %}
+                <div class="bg-amber-400" style="width: {{ pending_companies_percent }}%;"></div>
+                {% widthratio rejected_companies_count total_companies 100 as rejected_companies_percent %}
+                <div class="bg-rose-500" style="width: {{ rejected_companies_percent }}%;"></div>
+            </div>
+        </div>
+
+        <!-- Metric 3: Active Job Drives -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Job Drives</span>
+                <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">💼</span>
+            </div>
+            <div>
+                <div class="text-2xl sm:text-3xl font-extrabold text-slate-900">{{ total_jobs }}</div>
+                <div class="text-xs text-slate-500 mt-1 font-medium">
+                    <span class="text-indigo-600 font-bold">{{ active_jobs_count }} Active</span> &bull;
+                    <span class="text-slate-400">{{ paused_jobs_count }} Paused</span>
+                </div>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                {% widthratio active_jobs_count total_jobs 100 as active_jobs_percent %}
+                <div class="bg-indigo-600 h-2 rounded-full transition-all duration-500" style="width: {{ active_jobs_percent }}%;"></div>
+            </div>
+        </div>
+
+        <!-- Metric 4: Total Applications & Pipeline -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Application Pipeline</span>
+                <span class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-sm">📑</span>
+            </div>
+            <div>
+                <div class="text-2xl sm:text-3xl font-extrabold text-slate-900">{{ total_applications }}</div>
+                <div class="text-xs text-slate-500 mt-1 font-medium">
+                    <span class="text-purple-600 font-bold">{{ shortlisted_count }} Shortlisted</span> &bull;
+                    <span class="text-emerald-600 font-bold">{{ selected_count }} Offers</span>
+                </div>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                {% widthratio selected_count total_applications 100 as selected_applications_percent %}
+                <div class="bg-purple-600 h-2 rounded-full transition-all duration-500" style="width: {{ selected_applications_percent }}%;"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 3. WORKFLOW NAVIGATION TABS -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-2 shadow-sm">
+        <div class="flex flex-wrap gap-2 text-xs font-bold">
+            <button type="button" onclick="switchTab('companies')" id="tabBtn-companies" class="tab-button px-4 py-2.5 rounded-xl transition flex items-center gap-2 bg-indigo-600 text-white shadow-sm">
+                <span>🏢</span> Company Verification Hub
+                {% if pending_companies_count > 0 %}
+                    <span class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black">{{ pending_companies_count }} PENDING</span>
+                {% endif %}
+            </button>
+            <button type="button" onclick="switchTab('jobs')" id="tabBtn-jobs" class="tab-button px-4 py-2.5 rounded-xl transition flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                <span>💼</span> Campus Job Drives ({{ total_jobs }})
+            </button>
+            <button type="button" onclick="switchTab('applications')" id="tabBtn-applications" class="tab-button px-4 py-2.5 rounded-xl transition flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                <span>📑</span> Applications & Meeting Links ({{ total_applications }})
+            </button>
+            <button type="button" onclick="switchTab('students')" id="tabBtn-students" class="tab-button px-4 py-2.5 rounded-xl transition flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                <span>🎓</span> Student Placement Directory ({{ total_students }})
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 1: COMPANY VERIFICATION & AUTHENTICITY HUB (REAL VS FAKE) -->
+    <!-- ========================================================================= -->
+    <div id="tabContent-companies" class="tab-pane space-y-6">
+        
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 lg:p-8 space-y-6">
+            
+            <!-- Section Header & Filter Controls -->
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2.5">
+                        <span>🛡️</span> Company Authenticity & Verification Control
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">
+                        Verify company authenticity to ensure students apply only to genuine recruiters. Unverified or fake companies are blocked from signing in.
+                    </p>
+                </div>
+
+                <!-- Status Filter Pills -->
+                <div class="flex flex-wrap items-center gap-2 text-xs">
+                    <a href="?company_status=all#companies-section" class="px-3 py-1.5 rounded-xl font-semibold transition {% if company_filter == 'all' %}bg-slate-900 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                        All ({{ total_companies }})
+                    </a>
+                    <a href="?company_status=pending#companies-section" class="px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1.5 {% if company_filter == 'pending' %}bg-amber-500 text-slate-950{% else %}bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200{% endif %}">
+                        <span>⚠️</span> Pending ({{ pending_companies_count }})
+                    </a>
+                    <a href="?company_status=verified#companies-section" class="px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1.5 {% if company_filter == 'verified' %}bg-emerald-600 text-white{% else %}bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200{% endif %}">
+                        <span>✓</span> Real / Verified ({{ verified_companies_count }})
+                    </a>
+                    <a href="?company_status=rejected#companies-section" class="px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1.5 {% if company_filter == 'rejected' %}bg-rose-600 text-white{% else %}bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200{% endif %}">
+                        <span>✕</span> Fake / Rejected ({{ rejected_companies_count }})
+                    </a>
+                </div>
+            </div>
+
+            <!-- Search Form -->
+            <form method="GET" class="flex items-center gap-3">
+                <input type="hidden" name="tab" value="companies">
+                <input type="hidden" name="company_status" value="{{ company_filter }}">
+                <div class="relative flex-1">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">🔍</span>
+                    <input type="text" name="q_company" value="{{ q_company }}" placeholder="Search company by name, email, or phone..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-500 transition">
+                </div>
+                <button type="submit" class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl transition">
+                    Search
+                </button>
+                {% if q_company %}
+                    <a href="?company_status={{ company_filter }}#companies-section" class="text-xs text-rose-600 hover:underline px-2">Clear</a>
+                {% endif %}
+            </form>
+
+            <!-- Company List Cards -->
+            <div class="space-y-4">
+                {% for company in companies %}
+                    <div class="p-5 sm:p-6 rounded-2xl border transition-all hover:shadow-md {% if company.verification_status == 'PENDING' %}bg-amber-50/40 border-amber-200{% elif company.verification_status == 'VERIFIED' %}bg-white border-slate-200{% else %}bg-rose-50/40 border-rose-200{% endif %}">
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+                            
+                            <!-- Left: Company Identity & Information -->
+                            <div class="flex items-start gap-4">
+                                <div class="w-14 h-14 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+                                    {% if company.logo %}
+                                        <img src="{{ company.logo.url }}" alt="{{ company.company_name }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                        <span class="text-xl font-bold text-slate-600">{{ company.company_name|slice:":1"|upper }}</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="space-y-1">
+                                    <div class="flex flex-wrap items-center gap-2.5">
+                                        <h3 class="text-base font-extrabold text-slate-900">{{ company.company_name }}</h3>
+                                        
+                                        <!-- Verification Status Badge -->
+                                        {% if company.verification_status == 'VERIFIED' %}
+                                            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                                                <span>✓</span> Real Company (Verified)
+                                            </span>
+                                        {% elif company.verification_status == 'PENDING' %}
+                                            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-200 text-amber-900 border border-amber-300 flex items-center gap-1 animate-pulse">
+                                                <span>⚠️</span> Pending Admin Verification
+                                            </span>
+                                        {% elif company.verification_status == 'REJECTED' %}
+                                            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1">
+                                                <span>🚫</span> Flagged as Fake / Rejected
+                                            </span>
+                                        {% endif %}
+
+                                        <span class="text-[11px] text-slate-400">Registered: {{ company.created_at|date:"M d, Y" }}</span>
+                                    </div>
+
+                                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
+                                        <span>✉️ {{ company.contact_email|default:company.user.email }}</span>
+                                        {% if company.contact_phone %}
+                                            <span>📞 {{ company.contact_phone }}</span>
+                                        {% endif %}
+                                        {% if company.website %}
+                                            <a href="{{ company.website }}" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
+                                                <span>🌐</span> {{ company.website|truncatechars:35 }} ↗
+                                            </a>
+                                        {% else %}
+                                            <span class="text-slate-400 italic">No website provided</span>
+                                        {% endif %}
+                                        <span>💼 {{ company.job_postings.count }} Job Drive(s)</span>
+                                    </div>
+
+                                    {% if company.description %}
+                                        <p class="text-xs text-slate-500 line-clamp-2 mt-1">
+                                            {{ company.description }}
+                                        </p>
+                                    {% endif %}
+
+                                    {% if company.verification_remarks %}
+                                        <div class="mt-2 text-[11px] px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-start gap-1.5">
+                                            <span class="font-bold">Admin Remarks:</span>
+                                            <span>{{ company.verification_remarks }}</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Right: Verification Action Buttons -->
+                            <div class="flex flex-wrap lg:flex-col items-stretch sm:items-end gap-2 shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+                                
+                                <!-- 1. Approve as Real Button -->
+                                {% if company.verification_status != 'VERIFIED' %}
+                                    <button type="button" 
+                                            onclick="openVerificationModal('{{ company.id }}', '{{ company.company_name|escapejs }}', 'approve', 'Verified as authentic company by Placement Office.')"
+                                            class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm flex items-center justify-center gap-1.5">
+                                        <span>✓</span> Verify as Real
+                                    </button>
+                                {% endif %}
+
+                                <!-- 2. Flag as Fake / Reject Button -->
+                                {% if company.verification_status != 'REJECTED' %}
+                                    <button type="button" 
+                                            onclick="openVerificationModal('{{ company.id }}', '{{ company.company_name|escapejs }}', 'reject', 'Flagged as fake / unverified recruiter by Placement Office.')"
+                                            class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition shadow-sm flex items-center justify-center gap-1.5">
+                                        <span>🚫</span> Flag as Fake
+                                    </button>
+                                {% endif %}
+
+                                <!-- 3. Reset to Pending -->
+                                {% if company.verification_status != 'PENDING' %}
+                                    <form method="POST" action="{% url 'verify_company' company.id 'reset' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="w-full px-3 py-1.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 text-xs font-semibold transition">
+                                            Reset to Pending
+                                        </button>
+                                    </form>
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center py-12 bg-slate-50 rounded-2xl border border-slate-200">
+                        <span class="text-3xl">🏢</span>
+                        <h4 class="text-sm font-bold text-slate-700 mt-2">No companies found matching criteria</h4>
+                        <p class="text-xs text-slate-400 mt-1">Try switching status filters or clearing your search term.</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 2: CAMPUS JOB DRIVES WORKFLOW -->
+    <!-- ========================================================================= -->
+    <div id="tabContent-jobs" class="tab-pane hidden space-y-6">
+        
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 lg:p-8 space-y-6">
+            
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2.5">
+                        <span>💼</span> Job Drives Across All Companies
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">
+                        Monitor campus placement listings, pause expired or questionable drives, and oversee candidate applicant pools.
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-2 text-xs">
+                    <a href="?job_status=all#jobs-section" onclick="switchTab('jobs')" class="px-3 py-1.5 rounded-xl font-semibold transition {% if job_status_filter == 'all' %}bg-slate-900 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                        All ({{ total_jobs }})
+                    </a>
+                    <a href="?job_status=active#jobs-section" onclick="switchTab('jobs')" class="px-3 py-1.5 rounded-xl font-semibold transition {% if job_status_filter == 'active' %}bg-indigo-600 text-white{% else %}bg-indigo-50 text-indigo-700 hover:bg-indigo-100{% endif %}">
+                        Active ({{ active_jobs_count }})
+                    </a>
+                    <a href="?job_status=paused#jobs-section" onclick="switchTab('jobs')" class="px-3 py-1.5 rounded-xl font-semibold transition {% if job_status_filter == 'paused' %}bg-slate-600 text-white{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">
+                        Paused ({{ paused_jobs_count }})
+                    </a>
+                </div>
+            </div>
+
+            <!-- Table of Jobs -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-100">
+                        <tr>
+                            <th class="py-3 px-4">Job Role & Company</th>
+                            <th class="py-3 px-4">Package (LPA)</th>
+                            <th class="py-3 px-4">Eligibility</th>
+                            <th class="py-3 px-4">Deadline</th>
+                            <th class="py-3 px-4">Applicants</th>
+                            <th class="py-3 px-4">Status</th>
+                            <th class="py-3 px-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-slate-700">
+                        {% for job in jobs %}
+                            <tr class="hover:bg-slate-50/80 transition">
+                                <td class="py-3.5 px-4">
+                                    <div class="font-bold text-slate-900 text-sm">
+                                        <a href="{% url 'job_detail' job.id %}" class="hover:text-indigo-600 transition">{{ job.title }}</a>
+                                    </div>
+                                    <div class="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
+                                        <span>🏢 {{ job.company.company_name }}</span> &bull;
+                                        <span>📍 {{ job.location }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-3.5 px-4 font-bold text-slate-900">
+                                    ₹ {{ job.package_lpa }} LPA
+                                </td>
+                                <td class="py-3.5 px-4 text-[11px]">
+                                    <div>Min CGPA: <strong class="text-indigo-600">{{ job.min_cgpa }}</strong></div>
+                                    <div>Max Backlogs: <strong class="text-slate-600">{{ job.max_backlogs }}</strong></div>
+                                </td>
+                                <td class="py-3.5 px-4 text-[11px]">
+                                    <span>{{ job.deadline|date:"M d, Y" }}</span>
+                                    {% if job.is_deadline_passed %}
+                                        <span class="block text-rose-500 font-bold">Passed</span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    <span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-bold text-[11px]">
+                                        👥 {{ job.applications.count }}
+                                    </span>
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    {% if job.is_active %}
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            Active
+                                        </span>
+                                    {% else %}
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                                            Paused
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3.5 px-4 text-right space-x-2">
+                                    <a href="{% url 'toggle_job_active' job.id %}" class="px-2.5 py-1 rounded-lg border text-xs font-semibold hover:bg-slate-100 transition" title="Toggle active/paused">
+                                        {% if job.is_active %}⏸ Pause{% else %}▶ Activate{% endif %}
+                                    </a>
+                                    <a href="{% url 'job_detail' job.id %}" class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold transition">
+                                        View
+                                    </a>
+                                    <a href="{% url 'delete_job' job.id %}" class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 font-semibold transition">
+                                        Delete
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="py-8 text-center text-slate-400">
+                                    No job postings found.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 3: APPLICATIONS & INTERVIEW WORKFLOW -->
+    <!-- ========================================================================= -->
+    <div id="tabContent-applications" class="tab-pane hidden space-y-6">
+        
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 lg:p-8 space-y-6">
+            
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2.5">
+                        <span>📑</span> Candidate Applications & Interview Meeting Links
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">
+                        Track candidate progress, verify scheduled interview links (Google Meet / Zoom / MS Teams), and supervise placement selections.
+                    </p>
+                </div>
+
+                <!-- Stage Filter -->
+                <div class="flex flex-wrap items-center gap-2 text-xs">
+                    <a href="?app_status=all#applications-section" onclick="switchTab('applications')" class="px-3 py-1.5 rounded-xl font-semibold transition {% if app_status_filter == 'all' or not app_status_filter %}bg-slate-900 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                        All ({{ total_applications }})
+                    </a>
+                    <a href="?app_status=SHORTLISTED#applications-section" onclick="switchTab('applications')" class="px-3 py-1.5 rounded-xl font-semibold transition bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200">
+                        Shortlisted ({{ shortlisted_count }})
+                    </a>
+                    <a href="?app_status=INTERVIEW_SCHEDULED#applications-section" onclick="switchTab('applications')" class="px-3 py-1.5 rounded-xl font-semibold transition bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200">
+                        Scheduled ({{ interview_scheduled_count }})
+                    </a>
+                    <a href="?app_status=SELECTED#applications-section" onclick="switchTab('applications')" class="px-3 py-1.5 rounded-xl font-semibold transition bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200">
+                        Selected ({{ selected_count }})
+                    </a>
+                </div>
+            </div>
+
+            <!-- Applications Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-100">
+                        <tr>
+                            <th class="py-3 px-4">Candidate Student</th>
+                            <th class="py-3 px-4">Applied Job & Company</th>
+                            <th class="py-3 px-4">Application Stage</th>
+                            <th class="py-3 px-4">Interview Schedule & Meeting Link</th>
+                            <th class="py-3 px-4">Date Applied</th>
+                            <th class="py-3 px-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-slate-700">
+                        {% for app in applications %}
+                            <tr class="hover:bg-slate-50/80 transition">
+                                <td class="py-3.5 px-4">
+                                    <div class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                                        <span>{{ app.student.full_name }}</span>
+                                        {% if app.student.is_placed %}
+                                            <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-bold">Placed</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="text-[11px] text-slate-500">
+                                        Roll: {{ app.student.roll_number }} &bull; {{ app.student.branch }} (CGPA: {{ app.student.cgpa }})
+                                    </div>
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    <div class="font-bold text-slate-800">{{ app.job.title }}</div>
+                                    <div class="text-[11px] text-slate-500">🏢 {{ app.job.company.company_name }}</div>
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    {% if app.status == 'SELECTED' %}
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            🎉 {{ app.get_status_display }}
+                                        </span>
+                                    {% elif app.status == 'SHORTLISTED' %}
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                            ⭐ {{ app.get_status_display }}
+                                        </span>
+                                    {% elif app.status == 'INTERVIEW_SCHEDULED' %}
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                                            📅 {{ app.get_status_display }}
+                                        </span>
+                                    {% elif app.status == 'UNDER_REVIEW' %}
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                            ⏳ {{ app.get_status_display }}
+                                        </span>
+                                    {% elif app.status == 'REJECTED' %}
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                            ✕ {{ app.get_status_display }}
+                                        </span>
+                                    {% else %}
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                            {{ app.get_status_display }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3.5 px-4 text-[11px]">
+                                    {% if app.interview_location_or_link %}
+                                        {% if "http" in app.interview_location_or_link %}
+                                            <a href="{{ app.interview_location_or_link }}" target="_blank" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 font-bold hover:bg-blue-100 transition border border-blue-200 mb-1">
+                                                <span>🎥</span> Join Interview Link ↗
+                                            </a>
+                                        {% else %}
+                                            <div class="font-medium text-slate-800">📍 {{ app.interview_location_or_link }}</div>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-slate-400 italic">No link specified</span>
+                                    {% endif %}
+
+                                    {% if app.interview_date %}
+                                        <div class="text-[10px] text-slate-500 font-medium">
+                                            🕒 {{ app.interview_date|date:"M d, Y H:i" }}
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3.5 px-4 text-[11px] text-slate-500">
+                                    {{ app.applied_at|date:"M d, Y" }}
+                                </td>
+                                <td class="py-3.5 px-4 text-right space-x-2">
+                                    <a href="{% url 'update_application_status' app.id %}" class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold transition">
+                                        Update / Link
+                                    </a>
+                                    {% if app.student.resume %}
+                                        <a href="{{ app.student.resume.url }}" target="_blank" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold transition" title="View Resume">
+                                            Resume ↗
+                                        </a>
+                                    {% endif %}
+                                    <a href="{% url 'delete_application' app.id %}" class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 font-semibold transition">
+                                        Remove
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="py-8 text-center text-slate-400">
+                                    No applications found.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 4: STUDENT PLACEMENT DIRECTORY -->
+    <!-- ========================================================================= -->
+    <div id="tabContent-students" class="tab-pane hidden space-y-6">
+        
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 lg:p-8 space-y-6">
+            
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2.5">
+                        <span>🎓</span> Student Placement Directory
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">
+                        Overview of all registered students, their academic qualifications, and placement status across companies.
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-2 text-xs">
+                    <a href="?student_status=all#students-section" onclick="switchTab('students')" class="px-3 py-1.5 rounded-xl font-semibold transition {% if student_status_filter == 'all' or not student_status_filter %}bg-slate-900 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                        All ({{ total_students }})
+                    </a>
+                    <a href="?student_status=placed#students-section" onclick="switchTab('students')" class="px-3 py-1.5 rounded-xl font-semibold transition bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200">
+                        Placed ({{ placed_students }})
+                    </a>
+                    <a href="?student_status=unplaced#students-section" onclick="switchTab('students')" class="px-3 py-1.5 rounded-xl font-semibold transition bg-slate-100 text-slate-700 hover:bg-slate-200">
+                        In Search ({{ unplaced_students }})
+                    </a>
+                </div>
+            </div>
+
+            <!-- Students Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-100">
+                        <tr>
+                            <th class="py-3 px-4">Student Name</th>
+                            <th class="py-3 px-4">Roll Number</th>
+                            <th class="py-3 px-4">Branch</th>
+                            <th class="py-3 px-4">CGPA / Backlogs</th>
+                            <th class="py-3 px-4">Contact</th>
+                            <th class="py-3 px-4">Placement Status</th>
+                            <th class="py-3 px-4 text-right">Resume</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-slate-700">
+                        {% for st in students %}
+                            <tr class="hover:bg-slate-50/80 transition">
+                                <td class="py-3.5 px-4 font-bold text-slate-900 text-sm">
+                                    {{ st.full_name }}
+                                </td>
+                                <td class="py-3.5 px-4 font-mono font-bold text-slate-700">
+                                    {{ st.roll_number }}
+                                </td>
+                                <td class="py-3.5 px-4 font-medium">
+                                    {{ st.branch }}
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    <span class="font-bold text-indigo-600">{{ st.cgpa }}</span>
+                                    {% if st.backlogs > 0 %}
+                                        <span class="text-rose-500 text-[10px] block">({{ st.backlogs }} backlog)</span>
+                                    {% else %}
+                                        <span class="text-emerald-600 text-[10px] block">(0 backlogs)</span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3.5 px-4 text-[11px] text-slate-500">
+                                    <div>✉️ {{ st.user.email }}</div>
+                                    {% if st.phone %}<div>📞 {{ st.phone }}</div>{% endif %}
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    {% if st.is_placed %}
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                            🎉 Placed
+                                        </span>
+                                    {% else %}
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                                            Active Candidate
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3.5 px-4 text-right">
+                                    {% if st.resume %}
+                                        <a href="{{ st.resume.url }}" target="_blank" class="px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold transition inline-flex items-center gap-1">
+                                            <span>📄</span> View ↗
+                                        </a>
+                                    {% else %}
+                                        <span class="text-slate-400 italic">None</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="py-8 text-center text-slate-400">
+                                    No students found.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL: COMPANY AUTHENTICITY VERIFICATION CONFIRMATION & REMARKS -->
+<!-- ========================================================================= -->
+<div id="verificationModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-lg w-full p-6 sm:p-8 space-y-6 animate-scale-up">
+        
+        <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+                <div id="modalIconContainer" class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-bold">
+                    🛡️
+                </div>
+                <div>
+                    <h3 id="modalTitle" class="text-lg font-extrabold text-slate-900">Verify Company</h3>
+                    <p id="modalSubtitle" class="text-xs text-slate-500">Confirm recruiter authenticity.</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeVerificationModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold p-1">
+                ✕
+            </button>
+        </div>
+
+        <form id="verificationForm" method="POST" action="" class="space-y-4 text-xs">
+            {% csrf_token %}
+            
+            <div>
+                <label class="block font-semibold text-slate-700 mb-1.5">
+                    Administrator Audit Remarks & Reason:
+                </label>
+                <textarea id="modalRemarksInput" name="remarks" rows="3" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-indigo-500" placeholder="e.g. CIN verified, official corporate domain confirmed, or Suspicious domain and unverified contact number..."></textarea>
+                <span class="text-[10px] text-slate-400 mt-1 block">These remarks are recorded for administrative auditing and shown to recruiters if rejected.</span>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeVerificationModal()" class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition">
+                    Cancel
+                </button>
+                <button type="submit" id="modalSubmitBtn" class="px-6 py-2.5 rounded-xl text-white font-bold transition shadow-md">
+                    Confirm Action
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    // Tab switching logic
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm');
+            btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+        });
+
+        const activePane = document.getElementById(`tabContent-${tabName}`);
+        const activeBtn = document.getElementById(`tabBtn-${tabName}`);
+        if (activePane) activePane.classList.remove('hidden');
+        if (activeBtn) {
+            activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
+            activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+        }
+    }
+
+    // Modal logic for verification actions
+    function openVerificationModal(companyId, companyName, action, defaultRemarks) {
+        const modal = document.getElementById('verificationModal');
+        const form = document.getElementById('verificationForm');
+        const title = document.getElementById('modalTitle');
+        const subtitle = document.getElementById('modalSubtitle');
+        const iconContainer = document.getElementById('modalIconContainer');
+        const submitBtn = document.getElementById('modalSubmitBtn');
+        const remarksInput = document.getElementById('modalRemarksInput');
+
+        form.action = `/companies/${companyId}/verify/${action}/`;
+        remarksInput.value = defaultRemarks || '';
+
+        if (action === 'approve') {
+            title.textContent = `Verify "${companyName}" as REAL`;
+            subtitle.textContent = "The recruiter will be authorized to log in, post jobs, and interview candidates.";
+            iconContainer.className = "w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl font-bold";
+            iconContainer.textContent = "✓";
+            submitBtn.className = "px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition shadow-md";
+            submitBtn.textContent = "Approve & Verify Real";
+        } else if (action === 'reject') {
+            title.textContent = `Flag "${companyName}" as FAKE / REJECT`;
+            subtitle.textContent = "Account login will be blocked. Students will be protected from fraudulent postings.";
+            iconContainer.className = "w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-xl font-bold";
+            iconContainer.textContent = "🚫";
+            submitBtn.className = "px-6 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold transition shadow-md";
+            submitBtn.textContent = "Block & Flag as Fake";
+        }
+
+        modal.classList.remove('hidden');
+    }
+
+    function closeVerificationModal() {
+        const modal = document.getElementById('verificationModal');
+        modal.classList.add('hidden');
+    }
+
+    // Initialize tab from URL query param or hash on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+        const hash = window.location.hash;
+
+        if (tabParam) {
+            switchTab(tabParam);
+        } else if (hash.includes('applications')) {
+            switchTab('applications');
+        } else if (hash.includes('jobs')) {
+            switchTab('jobs');
+        } else if (hash.includes('students')) {
+            switchTab('students');
+        } else {
+            switchTab('companies');
+        }
+    });
+</script>
+{% endblock %}
